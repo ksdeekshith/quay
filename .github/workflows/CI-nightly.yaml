@@ -6,7 +6,7 @@ on:
     inputs: {}
 jobs:
   unit:
-    if: github.repository == 'quay/quay'
+    if: github.repository == 'ksdeekshith/quay'
     name: Run all Test
     runs-on: ubuntu-20.04
     env:
@@ -22,7 +22,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        platform: ['amd64','ppc64le','s390x']
+        platform: ['amd64','s390x']
     steps:
     - name: install ibmcli and setup ibm login 
       if: ${{ matrix.platform  == 's390x' }}
@@ -111,8 +111,11 @@ jobs:
           cd build && git checkout ${GH_REF}
           cat requirements-dev.txt | grep tox | xargs python3 -m pip -qq install
 
-          if [[ 'ppc64le' == $(uname -m) ]]; then
-            sed -i "s/PyYAML==5.4.1/PyYAML==6.0.1/" requirements.txt
+          if [[ 'ppc64le' == $(uname -m) ]]; then	
+            sed -i "s/PyYAML==5.4.1/PyYAML==6.0.1/" requirements.txt	
+          else	
+            GRPC_LATEST=$(grep "grpcio" requirements.txt |cut -d "=" -f 3)	
+            export GRPC_PYTHON_BUILD_SYSTEM_OPENSSL=1 && python3 -m pip install -qq grpcio==${GRPC_LATEST}	
           fi
 
           #Unit
