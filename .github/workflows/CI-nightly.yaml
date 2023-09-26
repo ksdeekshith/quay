@@ -22,7 +22,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        platform: ['amd64', 's390x']
+        platform: ['s390x']
     steps:
     - uses: actions/checkout@v3
     
