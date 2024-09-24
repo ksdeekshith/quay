@@ -51,12 +51,6 @@ jobs:
           chmod 600 ~/.ssh/id_builder_s390x
           echo "$BUILDER_S390X_SSH_KEY" > ~/.ssh/id_builder_s390x
 
-          touch ~/.ssh/known_hosts
-          chmod 600 ~/.ssh/known_hosts
-          cat >~/.ssh/known_hosts <<END
-          $BUILDER_S390X_SSH_KNOWN_HOSTS
-          END
-
           touch ~/.ssh/config
           chmod 600 ~/.ssh/config
           cat >~/.ssh/config <<END
