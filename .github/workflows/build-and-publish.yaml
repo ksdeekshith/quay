@@ -41,8 +41,8 @@ jobs:
           # BUILDER_PPC64LE_SSH_KNOWN_HOSTS: ${{ secrets.BUILDER_PPC64LE_SSH_KNOWN_HOSTS }}
           BUILDER_S390X_SSH_HOST: ${{ secrets.BUILDER_S390X_SSH_HOST_TEST }}
           BUILDER_S390X_SSH_KEY: ${{ secrets.BUILDER_S390X_SSH_KEY_TEST }}
-          BUILDER_PPC64LE_SSH_KNOWN_HOSTS: ${{ secrets.BUILDER_S390X_SSH_KNOWN_HOSTS_TEST }}
-          BUILDER_PPC64LE_SSH_CONFIG: ${{ secrets.BUILDER_S390X_SSH_CONFIG_TEST }}
+          BUILDER_S390X_SSH_KNOWN_HOSTS: ${{ secrets.BUILDER_S390X_SSH_KNOWN_HOSTS_TEST }}
+          BUILDER_S390X_SSH_CONFIG: ${{ secrets.BUILDER_S390X_SSH_CONFIG_TEST }}
         run: |
           mkdir ~/.ssh
           chmod 700 ~/.ssh
@@ -51,12 +51,18 @@ jobs:
           chmod 600 ~/.ssh/id_builder_s390x
           echo "$BUILDER_S390X_SSH_KEY" > ~/.ssh/id_builder_s390x
 
+          touch ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/known_hosts
+          cat >~/.ssh/known_hosts <<END
+          $BUILDER_S390X_SSH_KNOWN_HOSTS
+          END
+          
           touch ~/.ssh/config
           chmod 600 ~/.ssh/config
           cat >~/.ssh/config <<END
           Host builder-s390x
             IdentityFile "~/.ssh/id_builder_s390x"
-          $BUILDER_PPC64LE_SSH_CONFIG
+          $BUILDER_S390X_SSH_CONFIG
           END
 
       - name: Set up Docker Buildx
