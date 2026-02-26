@@ -96,8 +96,8 @@ jobs:
       if: matrix.platform  == 's390x'
       uses: appleboy/ssh-action@v0.1.10
       env:
-        GH_REPOSITORY: ${{ github.server_url }}/${{ github.repository }}
-        GH_REF: ${{ github.ref }}
+        GH_REPOSITORY: ${{ github.server_url }}/quay/quay
+        GH_REF: refs/heads/master
         GRPC_PYTHON_BUILD_SYSTEM_OPENSSL: 1
       with:
         host: ${{ secrets.BUILDER_S390X_SSH_HOST_UBUNTU }}
