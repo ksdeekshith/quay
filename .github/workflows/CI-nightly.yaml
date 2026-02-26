@@ -112,7 +112,7 @@ jobs:
           apt-get -y install rustc cargo pkg-config
           rm -rf build
           git clone ${GH_REPOSITORY} build
-          cd build && git checkout ${GH_REF}
+          cd build && git checkout main
           cat requirements-dev.txt | grep tox | xargs python3 -m pip -qq install
 
           GRPC_LATEST=$(grep "grpcio" requirements.txt |cut -d "=" -f 3)
