@@ -101,8 +101,8 @@ jobs:
         GRPC_PYTHON_BUILD_SYSTEM_OPENSSL: 1
       with:
         host: ${{ secrets.BUILDER_S390X_SSH_HOST_UBUNTU }}
-        username: ${{ secrets.secrets.ZVSI_SSH_USER }}
-        key: ${{ secrets.secrets.ZVSI_PR_KEY}}
+        username: ${{ secrets.ZVSI_SSH_USER }}
+        key: ${{ secrets.ZVSI_PR_KEY}}
         envs: GH_REPOSITORY,GH_REF,GRPC_PYTHON_BUILD_SYSTEM_OPENSSL
         command_timeout: 100m
         script: |
