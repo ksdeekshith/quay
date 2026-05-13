@@ -84,8 +84,14 @@ RUN ARCH=$(uname -m) ; echo $ARCH; \
 	fi
 
 RUN set -ex\
+	; ARCH=$(uname -m) \
 	; python3 -m pip install --no-cache-dir --progress-bar off $(grep -e '^pip=' -e '^wheel=' -e '^setuptools=' ./requirements.txt) \
-	; python3 -m pip install --no-cache-dir --progress-bar off --requirement requirements.txt \
+	; if [ "$ARCH" == "s390x" ] ; then \
+		grep -v "pyroscope-io" requirements.txt > /tmp/requirements-s390x.txt; \
+		python3 -m pip install --no-cache-dir --progress-bar off --requirement /tmp/requirements-s390x.txt; \
+	else \
+		python3 -m pip install --no-cache-dir --progress-bar off --requirement requirements.txt; \
+	fi \
 	;
 RUN set -ex\
 # Doing this is explicitly against the purpose and use of certifi.
