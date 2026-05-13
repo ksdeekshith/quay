@@ -4,7 +4,7 @@ name: Build and Publish
 on:
   push:
     branches:
-      - redhat-** # IMPORTANT! this must match the jobs.build-and-publish.env.BRANCH_PREFIX (save the **).
+      - test-** # IMPORTANT! this must match the jobs.build-and-publish.env.BRANCH_PREFIX (save the **).
   workflow_dispatch:
     # Allows you to run this workflow manually from the Actions tab
     inputs:
@@ -16,11 +16,11 @@ permissions:
   contents: read
 
 jobs:
-  build-amd64-ppc64le-s390x:
-    name: Build amd64, ppc64le, s390x images
+  build-amd64-s390x:
+    name: Build amd64, s390x images
     env:
-      BRANCH_PREFIX: redhat- # IMPORTANT! this must match the .on.push.branches prefix!
-      REGISTRY: ${{ secrets.REGISTRY || 'quay.io/projectquay' }}
+      BRANCH_PREFIX: test- # IMPORTANT! this must match the .on.push.branches prefix!
+      REGISTRY: ${{ secrets.REGISTRY || 'quay.io/sdeekshi' }}
       REPO_NAME: ${{ github.event.repository.name }}
       TAG_SUFFIX: -unstable
     runs-on: 'ubuntu-latest'
@@ -56,36 +56,19 @@ jobs:
 
       - name: Setup SSH config for builders
         env:
-          BUILDER_PPC64LE_SSH_CONFIG: ${{ secrets.BUILDER_PPC64LE_SSH_CONFIG }}
-          BUILDER_PPC64LE_SSH_KEY: ${{ secrets.BUILDER_PPC64LE_SSH_KEY }}
-          BUILDER_PPC64LE_SSH_KNOWN_HOSTS: ${{ secrets.BUILDER_PPC64LE_SSH_KNOWN_HOSTS }}
           BUILDER_S390X_SSH_HOST: ${{ secrets.BUILDER_S390X_SSH_HOST }}
           BUILDER_S390X_SSH_KEY: ${{ secrets.BUILDER_S390X_SSH_KEY }}
         run: |
           mkdir ~/.ssh
           chmod 700 ~/.ssh
 
-          touch ~/.ssh/id_builder_ppc64le
-          chmod 600 ~/.ssh/id_builder_ppc64le
-          echo "$BUILDER_PPC64LE_SSH_KEY" >~/.ssh/id_builder_ppc64le
-
           touch ~/.ssh/id_builder_s390x
           chmod 600 ~/.ssh/id_builder_s390x
           echo "$BUILDER_S390X_SSH_KEY" > ~/.ssh/id_builder_s390x
 
-          touch ~/.ssh/known_hosts
-          chmod 600 ~/.ssh/known_hosts
-          cat >~/.ssh/known_hosts <<END
-          $BUILDER_PPC64LE_SSH_KNOWN_HOSTS
-          END
-
           touch ~/.ssh/config
           chmod 600 ~/.ssh/config
           cat >~/.ssh/config <<END
-          Host builder-ppc64le
-            IdentityFile "~/.ssh/id_builder_ppc64le"
-          $BUILDER_PPC64LE_SSH_CONFIG
-
           Host builder-s390x
             StrictHostKeyChecking no
             HostName $BUILDER_S390X_SSH_HOST
@@ -98,8 +81,6 @@ jobs:
         with:
           platforms: linux/amd64
           append: |
-            - endpoint: ssh://builder-ppc64le
-              platforms: linux/ppc64le
             - endpoint: ssh://builder-s390x
               platforms: linux/s390x
 
@@ -116,7 +97,7 @@ jobs:
         env:
           TAG: ${{ steps.version-from-branch.outputs.version }}${{ env.TAG_SUFFIX }}
         with:
-          platforms: linux/amd64,linux/ppc64le,linux/s390x
+          platforms: linux/amd64,linux/s390x
           push: true
           tags: ${{ env.REGISTRY }}/${{ env.REPO_NAME }}:${{ github.event.inputs.tag || env.TAG }}-amd64-ppc64le-s390x
 
@@ -129,8 +110,8 @@ jobs:
     name: Build ARM64 image
     runs-on: ubuntu-24.04-arm
     env:
-      BRANCH_PREFIX: redhat-
-      REGISTRY: ${{ secrets.REGISTRY || 'quay.io/projectquay' }}
+      BRANCH_PREFIX: test-
+      REGISTRY: ${{ secrets.REGISTRY || 'quay.io/sdeekshi' }}
       REPO_NAME: ${{ github.event.repository.name }}
       TAG_SUFFIX: -unstable
     outputs:
@@ -169,11 +150,11 @@ jobs:
 
   create-manifest:
     name: Create multi-arch manifest
-    needs: [build-amd64-ppc64le-s390x, build-arm64]
+    needs: [build-amd64-s390x, build-arm64]
     runs-on: ubuntu-latest
     env:
-      BRANCH_PREFIX: redhat-
-      REGISTRY: ${{ secrets.REGISTRY || 'quay.io/projectquay' }}
+      BRANCH_PREFIX: test-
+      REGISTRY: ${{ secrets.REGISTRY || 'quay.io/sdeekshi' }}
       REPO_NAME: ${{ github.event.repository.name }}
       TAG_SUFFIX: -unstable
     steps:
@@ -197,7 +178,7 @@ jobs:
         env:
           TAG: ${{ github.event.inputs.tag || steps.version.outputs.branch_tag }}
           IMAGE: ${{ env.REGISTRY }}/${{ env.REPO_NAME }}
-          DIGEST_MULTI: ${{ needs.build-amd64-ppc64le-s390x.outputs.digest }}
+          DIGEST_MULTI: ${{ needs.build-amd64-s390x.outputs.digest }}
           DIGEST_ARM64: ${{ needs.build-arm64.outputs.digest }}
         run: |
           # Combine the multi-arch image (amd64/ppc64le/s390x) with arm64 into final manifest
